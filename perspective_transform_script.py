@@ -43,13 +43,12 @@ def process_image_and_flatten(args):
     orig_img_bgr = cv2.imread(args[1])
     orig_hsv = cv2.cvtColor(orig_img_bgr, cv2.COLOR_BGR2HSV)
     cv2.imshow("orig",orig_img_bgr)
-    cv2.waitKey(0)
     t = 10
-    lower_blue = np.array([120-t,200,80])
-    upper_blue = np.array([120+t,255,140])
+    lower_blue = np.array([120-t,120,0])
+    upper_blue = np.array([120+t,255,255])
     mask = cv2.inRange(orig_hsv, lower_blue, upper_blue)
-    # cv2.imshow("blue_thresh", mask)
-    # cv2.waitKey(0)
+    cv2.imshow("blue_thresh", mask)
+    cv2.waitKey(0)
 
     #blur - can also experiment with removing this
     # blur = cv2.blur(mask,(5,5))
@@ -68,17 +67,16 @@ def process_image_and_flatten(args):
     threshold = 20
     _, img_bin = cv2.threshold(dilation, threshold, 255, cv2.THRESH_BINARY)
 
-    # cv2.imshow("img_bin", img_bin)
-    # cv2.waitKey(0)
-
+    cv2.imshow("img_bin", img_bin)
+    cv2.waitKey(0)
     # # get left and right edges of plate
     thresh = 255*20
     av_cols = np.sum(img_bin, axis=1)
     av_cols[av_cols<=thresh] = 0
     av_cols[av_cols>thresh] = 1
 
-    # get bottom 20 rows of blue in the image
-    non_zero = np.nonzero(av_cols)[0][-20:]
+    # get bottom 30 rows of blue in the image
+    non_zero = np.nonzero(av_cols)[0][-40:]
 
     # get bottom of each side block of blue on left and right side of plate
     thresh = 255*10
@@ -90,6 +88,7 @@ def process_image_and_flatten(args):
     # Count edges starting from the side specified by car_side
     # TODO: Will have to modify this when we decide at what point to that the img
     vert_edges = np.flatnonzero(av_rows_bot[:-1] != av_rows_bot[1:])
+    print("vert_edges:{}".format(vert_edges))
     if car_side == 0:
         inner_vert_edges = vert_edges[[1,2]]
     else:
@@ -120,7 +119,17 @@ def process_image_and_flatten(args):
     rect[3] = np.array([inner_vert_edges[0], bot_left_y])
     warped = four_point_transform(orig_img_bgr, rect)
 
-    cv2.imshow("flattened", warped)
+    target_width = 160
+    target_height = 200
+    dim = (target_width, target_height)
+    # resize image
+    resized = cv2.resize(warped, dim, interpolation = cv2.INTER_AREA)
+    cv2.imshow("resized", resized)
     cv2.waitKey(0)
+
+    split = args[1].split("/")
+    file_path = split[0]+"/flattened/"+split[1]
+    cv2.imwrite(file_path, resized)
+    print("Saved image to: " + file_path)
 if __name__ == '__main__':
     process_image_and_flatten(sys.argv)
