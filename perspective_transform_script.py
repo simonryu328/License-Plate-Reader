@@ -38,17 +38,18 @@ def four_point_transform(image, rect):
 
 def process_image_and_flatten(args):
     # we will set this as an argument later, when we test imgs on right side of screen 2. 0 means left, 1 means right
+    print("args {}".format(args[1]))
     car_side = 0
 
     orig_img_bgr = cv2.imread(args[1])
     orig_hsv = cv2.cvtColor(orig_img_bgr, cv2.COLOR_BGR2HSV)
-    cv2.imshow("orig",orig_img_bgr)
+    # cv2.imshow("orig",orig_img_bgr)
     t = 10
     lower_blue = np.array([120-t,120,0])
     upper_blue = np.array([120+t,255,255])
     mask = cv2.inRange(orig_hsv, lower_blue, upper_blue)
-    cv2.imshow("blue_thresh", mask)
-    cv2.waitKey(0)
+    # cv2.imshow("blue_thresh", mask)
+    # cv2.waitKey(0)
 
     #blur - can also experiment with removing this
     # blur = cv2.blur(mask,(5,5))
@@ -67,8 +68,8 @@ def process_image_and_flatten(args):
     threshold = 20
     _, img_bin = cv2.threshold(dilation, threshold, 255, cv2.THRESH_BINARY)
 
-    cv2.imshow("img_bin", img_bin)
-    cv2.waitKey(0)
+    # cv2.imshow("img_bin", img_bin)
+    # cv2.waitKey(0)
     # # get left and right edges of plate
     thresh = 255*20
     av_cols = np.sum(img_bin, axis=1)
@@ -124,11 +125,11 @@ def process_image_and_flatten(args):
     dim = (target_width, target_height)
     # resize image
     resized = cv2.resize(warped, dim, interpolation = cv2.INTER_AREA)
-    cv2.imshow("resized", resized)
-    cv2.waitKey(0)
+    # cv2.imshow("resized", resized)
+    # cv2.waitKey(0)
 
-    split = args[1].split("/")
-    file_path = split[0]+"/flattened/"+split[1]
+    filename = args[1].split("/")[-1]
+    file_path = args[1][0:-len(filename)] + "flattened/" + filename
     cv2.imwrite(file_path, resized)
     print("Saved image to: " + file_path)
 if __name__ == '__main__':

@@ -27,17 +27,13 @@ def segment_image(args):
     split = split.replace("_","")
     path = res2.group(1)
 
-    print(split)
-    print(res2.group(1))
+    print("Full Plate {}".format(split))
     for i in range(len(pix_map)):
         top = pix_map[i,0]
         bot = pix_map[i,1]
         char_img = img_gray[top[0]:bot[0],top[1]:bot[1]]
 
         # Resize Parking ID imgs to have same size as plate characters
-        print("char img shape {}".format(char_img.shape))
-        print(i)
-        print("dim: {}".format(dim))
         char_img = cv2.resize(char_img, dim, interpolation =cv2.INTER_AREA)
 
         # cv2.imshow("char",char_img)
