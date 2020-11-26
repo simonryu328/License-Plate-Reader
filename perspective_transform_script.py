@@ -37,14 +37,19 @@ def four_point_transform(image, rect):
     return warped
 
 def process_image_and_flatten(args):
-    # we will set this as an argument later, when we test imgs on right side of screen 2. 0 means left, 1 means right
-    print("args {}".format(args[1]))
-    car_side = 0
+    # for Robot Rontroller add car_side as a parameter for the function
 
+    #  START Dont Include in Robot Controller ______
     orig_img_bgr = cv2.imread(args[1])
+    #  END Dont Include in Robot Controller ______
+
+
+
+    # we will set this as an argument later, when we test imgs on right side of screen too. 0 means left, 1 means right
+    car_side = 0
+    t = 10
     orig_hsv = cv2.cvtColor(orig_img_bgr, cv2.COLOR_BGR2HSV)
     # cv2.imshow("orig",orig_img_bgr)
-    t = 10
     lower_blue = np.array([120-t,120,0])
     upper_blue = np.array([120+t,255,255])
     mask = cv2.inRange(orig_hsv, lower_blue, upper_blue)
@@ -123,14 +128,16 @@ def process_image_and_flatten(args):
     target_width = 160
     target_height = 200
     dim = (target_width, target_height)
-    # resize image
-    resized = cv2.resize(warped, dim, interpolation = cv2.INTER_AREA)
+    # # resize image
+    # resized = cv2.resize(warped, dim, interpolation = cv2.INTER_AREA)
     # cv2.imshow("resized", resized)
-    # cv2.waitKey(0)
+    cv2.waitKey(0)
 
+    #  START Dont Include in Robot Controller ______
     filename = args[1].split("/")[-1]
     file_path = args[1][0:-len(filename)] + "flattened/" + filename
     cv2.imwrite(file_path, resized)
     print("Saved image to: " + file_path)
+    #  END Dont Include in Robot Controller ______
 if __name__ == '__main__':
     process_image_and_flatten(sys.argv)
