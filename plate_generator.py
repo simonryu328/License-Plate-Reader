@@ -16,11 +16,11 @@ path = os.path.dirname(os.path.realpath(__file__)) + "/"
 outpath = 'generated_data/'
 
 def segment_characters(img, label):
-    ytop1 = 39
-    ytop2 = 608
-    dy1 = 310
+    ytop1 = 0
+    ytop2 = 590
+    dy1 = 460
     dx1 = 300
-    dy2 = 175
+    dy2 = 230
     dx2 = 135
     target_width = 37
     target_height = 27
@@ -87,7 +87,7 @@ def generate_plate_data(args):
         # QR_img = cv2.resize(QR_img, (600, 600), interpolation=cv2.INTER_AREA)
 
         # Create parking spot label
-        num = randint(0, 9)
+        num = randint(1, 8)
         s = "P" + str(num)
         parking_spot = 255 * np.ones(shape=[600, 600, 3], dtype=np.uint8)
         cv2.putText(parking_spot, s, (30, 450), cv2.FONT_HERSHEY_PLAIN, 28,
@@ -102,10 +102,12 @@ def generate_plate_data(args):
 
         # grayscale
         img_gray = cv2.cvtColor(unlabelled, cv2.COLOR_BGR2GRAY)
+        threshold = 100
+        _, img_bin = cv2.threshold(img_gray, threshold, 255, cv2.THRESH_BINARY)
 
-        # cv2.imshow("unlabelled",img_gray)
+        # cv2.imshow("unlabelled",img_bin)
         # cv2.waitKey(0)
-        seg_chars = segment_characters(img_gray, labels)
+        seg_chars = segment_characters(img_bin, labels)
 
         print("length of labels: {}".format(len(labels)))
         print(labels)

@@ -94,7 +94,10 @@ def process_image_and_flatten(args):
     # Count edges starting from the side specified by car_side
     # TODO: Will have to modify this when we decide at what point to that the img
     vert_edges = np.flatnonzero(av_rows_bot[:-1] != av_rows_bot[1:])
-    print("vert_edges:{}".format(vert_edges))
+
+    # this is so it does not fail if it does not detect 4 edges
+    if len(vert_edges) < 4:
+        return None
     if car_side == 0:
         inner_vert_edges = vert_edges[[1,2]]
     else:
@@ -129,9 +132,20 @@ def process_image_and_flatten(args):
     target_height = 200
     dim = (target_width, target_height)
     # # resize image
-    # resized = cv2.resize(warped, dim, interpolation = cv2.INTER_AREA)
+    resized = cv2.resize(warped, dim, interpolation = cv2.INTER_AREA)
     # cv2.imshow("resized", resized)
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
+
+    # INCLUDE in Robot Controller
+    # return resized
+    #
+    # Calling function should do something along the lines of
+    #
+    # flattened = process_image_and_flatten(img)
+    # if flattened is None:
+    #   -> try another picture
+    # else:
+    #   segment_license_plate_images()
 
     #  START Dont Include in Robot Controller ______
     filename = args[1].split("/")[-1]
@@ -139,5 +153,6 @@ def process_image_and_flatten(args):
     cv2.imwrite(file_path, resized)
     print("Saved image to: " + file_path)
     #  END Dont Include in Robot Controller ______
+
 if __name__ == '__main__':
     process_image_and_flatten(sys.argv)

@@ -39,11 +39,15 @@ def segment_image(args):
         top = pix_map[i,0]
         bot = pix_map[i,1]
         char_img = img_gray[top[0]:bot[0],top[1]:bot[1]]
-
         # Resize Parking ID imgs to have same size as plate characters
         char_img = cv2.resize(char_img, dim, interpolation =cv2.INTER_AREA)
+        # set right bin threshold
+        avg_val = np.ceil(char_img.mean(axis=0).mean())
+        print("avg_va; {}".format(avg_val))
+        threshold = avg_val*0.9
+        _, char_img = cv2.threshold(char_img, threshold, 255, cv2.THRESH_BINARY)
         # for Robot Rontroller do this:
-        # char_imgs.append(char_img)
+        # char_imgs.append(  char_img)
 
 
         #  START Dont Include in Robot Controller ______
