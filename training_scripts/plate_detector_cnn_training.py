@@ -23,6 +23,9 @@ from keras import backend
 from keras.preprocessing.image import ImageDataGenerator
 from matplotlib import pyplot as plt
 
+import seaborn as sns
+import pandas as pd
+
 def files_in_folder(folder_path):
     files = glob.glob(folder_path)
     return files
@@ -55,16 +58,16 @@ def custom_preprocessing(img):
     # "zoom out" then "zoom in"
     final_dim = np.array([img.shape[1], img.shape[0]])
     m = random.uniform(0,0.5)
-    intermediate_dim = np.rint(final_dim*(0.9 + m)).astype(int)
+    intermediate_dim = np.rint(final_dim*(0.8 + m)).astype(int)
 
     # zoom out
     img = cv2.resize(img, tuple(intermediate_dim), interpolation =cv2.INTER_AREA)
+    # Gaussian blur
+    img = cv2.GaussianBlur(img,(5,5),0.5)
     # zoom back in
     img = cv2.resize(img, tuple(final_dim), interpolation =cv2.INTER_AREA)
-    # Gaussian blur
-    img = cv2.GaussianBlur(img,(5,5),0.7)
     # restore binary
-    threshold = 0.6
+    threshold = 0.7
     _, img = cv2.threshold(img, threshold, 1, cv2.THRESH_BINARY)
     # restore dimensions necessary for keras
     img = np.expand_dims(img,axis=2)
@@ -120,7 +123,6 @@ def train_plate_detector_cnn():
     #                                 XV_dataset.shape[2], 1)
     XT_dataset = np.expand_dims(XT_dataset,axis=3)
     XV_dataset = np.expand_dims(XV_dataset,axis=3)
-    print("example 4th dim: {}".format(XT_dataset[1,0:2,:,:]))
     # Convert Y dataset to one-hot encoding
     YT_dataset = convert_to_one_hot(YT_dataset_orig, NUMBER_OF_LABELS).T
     YV_dataset = convert_to_one_hot(YV_dataset_orig, NUMBER_OF_LABELS).T
@@ -133,11 +135,11 @@ def train_plate_detector_cnn():
     # augment data
     datagen = ImageDataGenerator(
                                  preprocessing_function=custom_preprocessing,
-                                 rotation_range=2,
-                                 width_shift_range=0.03,
-                                 height_shift_range=0.03,
-                                 zoom_range=[0.99,1.01],
-                                 shear_range=2
+                                 rotation_range=3,
+                                 width_shift_range=0.02,
+                                 height_shift_range=0.02,
+                                 zoom_range=[1,1.7],
+                                 shear_range=3
                                  )
     # example purely for viewing
     it = datagen.flow(XT_dataset, YT_dataset, batch_size=1)
@@ -157,11 +159,11 @@ def train_plate_detector_cnn():
     plt.show()
 
     # real iterator
-    it = datagen.flow(XT_dataset, YT_dataset, batch_size=30)
+    it = datagen.flow(XT_dataset, YT_dataset, batch_size=40)
 
     # train CNN
     conv_model = models.Sequential()
-    conv_model.add(layers.Conv2D(2, (5,5), activation='relu',
+    conv_model.add(layers.Conv2D(2, (5,5),activation='relu',
                              input_shape=(27, 37, 1)))
     conv_model.add(layers.MaxPooling2D((2,2)))
     conv_model.add(layers.Conv2D(4, (5,5), activation='relu'))
@@ -169,8 +171,8 @@ def train_plate_detector_cnn():
     conv_model.add(layers.Flatten())
 
     # how should I decide the size of these fully connected layer?
-    conv_model.add(layers.Dense(500, activation='relu'))
-    conv_model.add(layers.Dense(200, activation='relu'))
+    conv_model.add(layers.Dense(400, activation='relu'))
+    conv_model.add(layers.Dense(100, activation='relu'))
     conv_model.add(layers.Dense(NUMBER_OF_LABELS, activation='softmax'))
 
     conv_model.summary()
@@ -180,7 +182,7 @@ def train_plate_detector_cnn():
                    metrics = ['categorical_accuracy'])
 
     history_conv = conv_model.fit(it,
-                              epochs=20,
+                              epochs=15,
                               validation_data=(XV_dataset, YV_dataset))
 
     plt.plot(history_conv.history['loss'])
@@ -211,6 +213,24 @@ def train_plate_detector_cnn():
     plt.text(0.6, 0.6, caption,
            color='orange', fontsize = 10,
            horizontalalignment='left', verticalalignment='bottom')
+    plt.show()
+
+
+    # confusion matrix
+    pred_y_validate = conv_model.predict(XV_dataset)
+    true_y_validate = YV_dataset
+
+    # Set prediction as largest probability, convert one-hot encoding representation
+    # to integer representation
+    pred_y_validate_int = np.array([np.argmax(pred) for pred in pred_y_validate])
+    true_y_validate_int = np.array([np.argmax(y) for y in true_y_validate])
+    cm = confusion_matrix(true_y_validate_int, pred_y_validate_int, np.arange(0,36))
+    plt.figure(figsize = (15,15))
+    labels = [int_to_char(i) for i in range(0,36)]
+    df_cm = pd.DataFrame(cm, index=labels, columns=labels)
+    sns.heatmap(df_cm, annot=True)
+    plt.xlabel("Predicted label \n val accuracy={}".format(history_conv.history['val_categorical_accuracy'][-1]))
+    plt.ylabel("True label")
     plt.show()
 if __name__ == '__main__':
     train_plate_detector_cnn()
