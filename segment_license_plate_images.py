@@ -34,8 +34,7 @@ def segment_image(args):
     #  END Dont Include in Robot Controller ______
 
     # for Robot Rontroller do this:
-    # char_imgs = []
-    for i in range(6):
+    for i in range(1,6):
         top = pix_map[i,0]
         bot = pix_map[i,1]
         char_img = img_gray[top[0]:bot[0],top[1]:bot[1]]
@@ -44,18 +43,24 @@ def segment_image(args):
         # set right bin threshold
         avg_val = np.ceil(char_img.mean(axis=0).mean())
         print("avg_va; {}".format(avg_val))
-        threshold = avg_val*0.9
+        threshold = avg_val*0.83
         _, char_img = cv2.threshold(char_img, threshold, 255, cv2.THRESH_BINARY)
-        # for Robot Rontroller do this:
+        # for Robot Rontroller do thmis:
         # char_imgs.append(  char_img)
 
 
         #  START Dont Include in Robot Controller ______
         # cv2.imshow("char",char_img)
         # cv2.waitKey(0)
-        num_imgs = len(glob.glob(path + "segmented/"+split[i] +"_*"+".png"))
+
+        if i == 1:
+            path2 = path+"segmented_parkingID/"+split[i] +"_*"+".png"
+        else:
+            path2 = path+"segmented_plate/"+split[i] +"_*"+".png"
+
+        num_imgs = len(glob.glob(path2))
         print("num_imgs: {}".format(num_imgs))
-        filename = path+"segmented/"+"{}_{}.png".format(split[i], num_imgs+1)
+        filename = path2.replace("*",str(num_imgs+1))
         cv2.imwrite(filename, char_img)
         print("Saved image to: " + filename)
         #  END Dont Include in Robot Controller ______

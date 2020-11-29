@@ -112,14 +112,19 @@ def generate_plate_data(args):
         print("length of labels: {}".format(len(labels)))
         print(labels)
 
-        for i in range(6):
+        for i in range(1,6):
             print(i)
             char_img = seg_chars[i]
             label = labels[i]
 
-            num_imgs = len(glob.glob(path+outpath+label+"_*"+".png"))
+            if i == 1:
+                path2 = path+outpath+"segmented_parkingID/"+label +"_*"+".png"
+            else:
+                path2 = path+outpath+"segmented_plate/"+label +"_*"+".png"
+
+            num_imgs = len(glob.glob(path2))
             print("num_imgs: {}".format(num_imgs))
-            filename = path+outpath+"{}_{}.png".format(label, num_imgs+1)
+            filename = path2.replace("*",str(num_imgs+1))
             cv2.imwrite(filename, char_img)
             print("Saved image to: " + filename)
 

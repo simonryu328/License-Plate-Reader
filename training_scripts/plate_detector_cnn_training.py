@@ -138,7 +138,7 @@ def train_plate_detector_cnn():
                                  rotation_range=3,
                                  width_shift_range=0.02,
                                  height_shift_range=0.02,
-                                 zoom_range=[1,1.7],
+                                 zoom_range=[1,1.3],
                                  shear_range=3
                                  )
     # example purely for viewing
@@ -159,7 +159,7 @@ def train_plate_detector_cnn():
     plt.show()
 
     # real iterator
-    it = datagen.flow(XT_dataset, YT_dataset, batch_size=40)
+    it = datagen.flow(XT_dataset, YT_dataset, batch_size=30)
 
     # train CNN
     conv_model = models.Sequential()
@@ -220,9 +220,21 @@ def train_plate_detector_cnn():
     pred_y_validate = conv_model.predict(XV_dataset)
     true_y_validate = YV_dataset
 
+    pred_y_validate_int = np.zeros(len(pred_y_validate))
+    for i in range(len(true_y_validate)):
+        # convert from onehot to int representation
+        label = np.argmax(true_y_validate[i])
+        pred = pred_y_validate[i]
+        # alpha character
+        if label < 26:
+            pred_y_validate_int[i] = np.argmax(pred[0:26])
+        else:
+            pred_y_validate_int[i] = 26 + np.argmax(pred[26:-1])
+        # print("pred_y_validate_int[i]: {} \n label: {}").format(
+        #     pred_y_validate_int[i], label)
     # Set prediction as largest probability, convert one-hot encoding representation
     # to integer representation
-    pred_y_validate_int = np.array([np.argmax(pred) for pred in pred_y_validate])
+    # pred_y_validate_int = np.array([np.argmax(pred) for pred in pred_y_validate])
     true_y_validate_int = np.array([np.argmax(y) for y in true_y_validate])
     cm = confusion_matrix(true_y_validate_int, pred_y_validate_int, np.arange(0,36))
     plt.figure(figsize = (15,15))
