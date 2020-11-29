@@ -62,10 +62,13 @@ def custom_preprocessing(img):
 
     # zoom out
     img = cv2.resize(img, tuple(intermediate_dim), interpolation =cv2.INTER_AREA)
+
     # Gaussian blur
-    img = cv2.GaussianBlur(img,(5,5),0.5)
+    img = cv2.GaussianBlur(img,(5,5),0.7)
+
     # zoom back in
     img = cv2.resize(img, tuple(final_dim), interpolation =cv2.INTER_AREA)
+
     # restore binary
     threshold = 0.7
     _, img = cv2.threshold(img, threshold, 1, cv2.THRESH_BINARY)
@@ -136,10 +139,10 @@ def train_plate_detector_cnn():
     datagen = ImageDataGenerator(
                                  preprocessing_function=custom_preprocessing,
                                  rotation_range=3,
-                                 width_shift_range=0.02,
-                                 height_shift_range=0.02,
+                                 width_shift_range=0.15,
+                                 height_shift_range=0.15,
                                  zoom_range=[1,1.3],
-                                 shear_range=3
+                                 shear_range=12
                                  )
     # example purely for viewing
     it = datagen.flow(XT_dataset, YT_dataset, batch_size=1)
@@ -176,13 +179,13 @@ def train_plate_detector_cnn():
     conv_model.add(layers.Dense(NUMBER_OF_LABELS, activation='softmax'))
 
     conv_model.summary()
-    LEARNING_RATE = 8e-5
+    LEARNING_RATE = 1e-4
     conv_model.compile(loss='categorical_crossentropy',
                    optimizer=optimizers.RMSprop(lr=LEARNING_RATE),
                    metrics = ['categorical_accuracy'])
 
     history_conv = conv_model.fit(it,
-                              epochs=30,
+                              epochs=70,
                               validation_data=(XV_dataset, YV_dataset))
 
     plt.plot(history_conv.history['loss'])
@@ -241,13 +244,13 @@ def train_plate_detector_cnn():
     labels = [int_to_char(i) for i in range(0,36)]
 
     # modified accuracy calculation
-    print("cm shape: {}".format(cm.shape))
-    row_sum = cm.sum(axis=1)
-    print("cm row sum: {}".format(row_sum))
+    cm_float = cm.astype(float)
+    print("Accuracy by category: {}".format(np.diag(cm_float)/cm_float.sum(axis=1)))
+    v_accuracy = np.mean(np.diag(cm_float)/cm_float.sum(axis=1))
 
     df_cm = pd.DataFrame(cm, index=labels, columns=labels)
     sns.heatmap(df_cm, annot=True)
-    plt.xlabel("Predicted label \n val accuracy={}".format(history_conv.history['val_categorical_accuracy'][-1]))
+    plt.xlabel("Predicted label \n val accuracy={}".format(v_accuracy))
     plt.ylabel("True label")
     plt.show()
 if __name__ == '__main__':
