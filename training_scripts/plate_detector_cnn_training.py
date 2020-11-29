@@ -176,13 +176,13 @@ def train_plate_detector_cnn():
     conv_model.add(layers.Dense(NUMBER_OF_LABELS, activation='softmax'))
 
     conv_model.summary()
-    LEARNING_RATE = 1e-4
+    LEARNING_RATE = 8e-5
     conv_model.compile(loss='categorical_crossentropy',
                    optimizer=optimizers.RMSprop(lr=LEARNING_RATE),
                    metrics = ['categorical_accuracy'])
 
     history_conv = conv_model.fit(it,
-                              epochs=15,
+                              epochs=30,
                               validation_data=(XV_dataset, YV_dataset))
 
     plt.plot(history_conv.history['loss'])
@@ -239,6 +239,12 @@ def train_plate_detector_cnn():
     cm = confusion_matrix(true_y_validate_int, pred_y_validate_int, np.arange(0,36))
     plt.figure(figsize = (15,15))
     labels = [int_to_char(i) for i in range(0,36)]
+
+    # modified accuracy calculation
+    print("cm shape: {}".format(cm.shape))
+    row_sum = cm.sum(axis=1)
+    print("cm row sum: {}".format(row_sum))
+
     df_cm = pd.DataFrame(cm, index=labels, columns=labels)
     sns.heatmap(df_cm, annot=True)
     plt.xlabel("Predicted label \n val accuracy={}".format(history_conv.history['val_categorical_accuracy'][-1]))

@@ -41,7 +41,7 @@ def segment_image(args):
         # Resize Parking ID imgs to have same size as plate characters
         char_img = cv2.resize(char_img, dim, interpolation =cv2.INTER_AREA)
         # set right bin threshold
-        avg_val = np.ceil(char_img.mean(axis=0).mean())
+        avg_val = np.ceil(np.mean(char_img))
         print("avg_va; {}".format(avg_val))
         threshold = avg_val*0.83
         _, char_img = cv2.threshold(char_img, threshold, 255, cv2.THRESH_BINARY)
