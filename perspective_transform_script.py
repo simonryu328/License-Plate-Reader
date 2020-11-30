@@ -37,16 +37,10 @@ def four_point_transform(image, rect):
     return warped
 
 def process_image_and_flatten(args):
-    # for Robot Rontroller add car_side as a parameter for the function
 
     #  START Dont Include in Robot Controller ______
     orig_img_bgr = cv2.imread(args[1])
     #  END Dont Include in Robot Controller ______
-
-
-
-    # we will set this as an argument later, when we test imgs on right side of screen too. 0 means left, 1 means right
-    car_side = 0
     t = 10
     orig_hsv = cv2.cvtColor(orig_img_bgr, cv2.COLOR_BGR2HSV)
     # cv2.imshow("orig",orig_img_bgr)
@@ -73,8 +67,9 @@ def process_image_and_flatten(args):
     threshold = 20
     _, img_bin = cv2.threshold(dilation, threshold, 255, cv2.THRESH_BINARY)
 
-    # cv2.imshow("img_bin", img_bin)
-    # cv2.waitKey(0)
+    cv2.imwrite("./example.png", img_bin)
+    cv2.imshow("img_bin", img_bin)
+    cv2.waitKey(0)
     # # get left and right edges of plate
     thresh = 255*20
     av_cols = np.sum(img_bin, axis=1)
@@ -94,14 +89,12 @@ def process_image_and_flatten(args):
     # Count edges starting from the side specified by car_side
     # TODO: Will have to modify this when we decide at what point to that the img
     vert_edges = np.flatnonzero(av_rows_bot[:-1] != av_rows_bot[1:])
-
+    print("vert_edges: {}".format(vert_edges))
     # this is so it does not fail if it does not detect 4 edges
     if len(vert_edges) < 4:
         return None
-    if car_side == 0:
-        inner_vert_edges = vert_edges[[1,2]]
     else:
-        inner_vert_edges = vert_edges[-2:]
+        inner_vert_edges = vert_edges[[1,2]]
     # Split image into two, so that we can get the bottom
     # of each blue rectangle
     t = 5

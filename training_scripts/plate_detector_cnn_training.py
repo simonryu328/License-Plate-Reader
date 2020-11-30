@@ -143,7 +143,7 @@ def train_plate_detector_cnn():
                                  width_shift_range=0.14,
                                  height_shift_range=0.14,
                                  zoom_range=[1,1.3],
-                                 shear_range=12
+                                 shear_range=14
                                  )
     # example purely for viewing
     it = datagen.flow(XT_dataset, YT_dataset, batch_size=1)
@@ -167,10 +167,10 @@ def train_plate_detector_cnn():
 
     # train CNN
     conv_model = models.Sequential()
-    conv_model.add(layers.Conv2D(4, (5,5),activation='relu',
+    conv_model.add(layers.Conv2D(8, (5,5),activation='relu',
                              input_shape=(27, 37, 1)))
-    conv_model.add(layers.MaxPooling2D((2,2)))
-    conv_model.add(layers.Conv2D(8, (5,5), activation='relu'))
+    # conv_model.add(layers.MaxPooling2D((2,2)))
+    conv_model.add(layers.Conv2D(16, (5,5), activation='relu'))
     conv_model.add(layers.MaxPooling2D((2,2)))
     conv_model.add(layers.Flatten())
 
