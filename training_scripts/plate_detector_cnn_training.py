@@ -14,13 +14,14 @@ import random
 import os
 import glob
 
-from keras import layers
-from keras import models
-from keras import optimizers
+import tensorflow as tf
+from tensorflow.keras import layers
+from tensorflow.keras import models
+from tensorflow.keras import optimizers
 
-from keras.utils import plot_model
-from keras import backend
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.utils import plot_model
+from tensorflow.keras import backend
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from matplotlib import pyplot as plt
 
 import seaborn as sns
