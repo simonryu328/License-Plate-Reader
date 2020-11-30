@@ -139,8 +139,8 @@ def train_plate_detector_cnn():
     datagen = ImageDataGenerator(
                                  preprocessing_function=custom_preprocessing,
                                  rotation_range=3,
-                                 width_shift_range=0.15,
-                                 height_shift_range=0.15,
+                                 width_shift_range=0.14,
+                                 height_shift_range=0.14,
                                  zoom_range=[1,1.3],
                                  shear_range=12
                                  )
@@ -166,16 +166,16 @@ def train_plate_detector_cnn():
 
     # train CNN
     conv_model = models.Sequential()
-    conv_model.add(layers.Conv2D(2, (5,5),activation='relu',
+    conv_model.add(layers.Conv2D(4, (5,5),activation='relu',
                              input_shape=(27, 37, 1)))
     conv_model.add(layers.MaxPooling2D((2,2)))
-    conv_model.add(layers.Conv2D(4, (5,5), activation='relu'))
+    conv_model.add(layers.Conv2D(8, (5,5), activation='relu'))
     conv_model.add(layers.MaxPooling2D((2,2)))
     conv_model.add(layers.Flatten())
 
     # how should I decide the size of these fully connected layer?
-    conv_model.add(layers.Dense(400, activation='relu'))
-    conv_model.add(layers.Dense(100, activation='relu'))
+    conv_model.add(layers.Dense(500, activation='relu'))
+    conv_model.add(layers.Dense(200, activation='relu'))
     conv_model.add(layers.Dense(NUMBER_OF_LABELS, activation='softmax'))
 
     conv_model.summary()
@@ -185,7 +185,7 @@ def train_plate_detector_cnn():
                    metrics = ['categorical_accuracy'])
 
     history_conv = conv_model.fit(it,
-                              epochs=70,
+                              epochs=100,
                               validation_data=(XV_dataset, YV_dataset))
 
     plt.plot(history_conv.history['loss'])
@@ -232,7 +232,7 @@ def train_plate_detector_cnn():
         if label < 26:
             pred_y_validate_int[i] = np.argmax(pred[0:26])
         else:
-            pred_y_validate_int[i] = 26 + np.argmax(pred[26:-1])
+            pred_y_validate_int[i] = 26 + np.argmax(pred[26:])
         # print("pred_y_validate_int[i]: {} \n label: {}").format(
         #     pred_y_validate_int[i], label)
     # Set prediction as largest probability, convert one-hot encoding representation
