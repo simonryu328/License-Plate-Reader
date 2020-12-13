@@ -67,9 +67,6 @@ def process_image_and_flatten(args):
     threshold = 20
     _, img_bin = cv2.threshold(dilation, threshold, 255, cv2.THRESH_BINARY)
 
-    cv2.imwrite("./example.png", img_bin)
-    cv2.imshow("img_bin", img_bin)
-    cv2.waitKey(0)
     # # get left and right edges of plate
     thresh = 255*20
     av_cols = np.sum(img_bin, axis=1)
@@ -97,7 +94,7 @@ def process_image_and_flatten(args):
         inner_vert_edges = vert_edges[[1,2]]
     # Split image into two, so that we can get the bottom
     # of each blue rectangle
-    t = 5
+    t = 20
     left_side = img_bin[:,inner_vert_edges[0]-t:inner_vert_edges[0]]
     right_side = img_bin[:,inner_vert_edges[1]:inner_vert_edges[1]+t]
 

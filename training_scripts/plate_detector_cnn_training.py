@@ -160,6 +160,7 @@ def train_plate_detector_cnn():
 
         ax.imshow(batch[0][0].squeeze(axis=2), cmap='gray', vmin=0, vmax=1)
     # show the figure
+    fig.suptitle("Example of Augmented Training Data")
     plt.show()
 
     # real iterator
@@ -253,6 +254,9 @@ def train_plate_detector_cnn():
     sns.heatmap(df_cm, annot=True)
     plt.xlabel("Predicted label \n val accuracy={}".format(v_accuracy))
     plt.ylabel("True label")
+    plt.title("Confusion Matrix")
     plt.show()
+
+    conv_model.save("./plate_detector_model")
 if __name__ == '__main__':
     train_plate_detector_cnn()
